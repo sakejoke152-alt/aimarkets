@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>AI Shef</title>
+<style>
+/* ════ RESET ════ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#ECE5DD;font-size:15px}
+
+/* ════ LAYOUT ════ */
+.screen{display:flex;flex-direction:column;height:100svh}
+
+/* ════ HEADER ════ */
+.header{
+  background:#075E54;
+  padding:10px 14px;
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.back-btn{
+  color:#fff;font-size:22px;background:none;border:none;
+  cursor:pointer;padding:4px 6px 4px 0;line-height:1;
+}
+.avatar{
+  width:40px;height:40px;border-radius:50%;
+  background:#128C7E;display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0;
+}
+.header-info{flex:1}
+.header-name{color:#fff;font-size:16px;font-weight:600;line-height:1.2}
+.header-status{color:#B2DFDB;font-size:12px;margin-top:1px}
+.header-btns{display:flex;gap:8px}
+.header-btn{
+  color:#fff;font-size:18px;background:none;border:none;
+  cursor:pointer;padding:6px;line-height:1;border-radius:50%;
+  transition:background .15s;position:relative;
+}
+.header-btn:hover{background:rgba(255,255,255,.15)}
+.badge{
+  position:absolute;top:2px;right:2px;
+  background:#FF5722;color:#fff;border-radius:50%;
+  width:15px;height:15px;font-size:9px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  border:1.5px solid #075E54;
+}
+
+/* ════ MODE CHIPS ════ */
+.modes{
+  background:#128C7E;
+  padding:8px 10px;
+  display:flex;gap:6px;
+  overflow-x:auto;scrollbar-width:none;
+  flex-shrink:0;
+}
+.modes::-webkit-scrollbar{display:none}
+.chip{
+  padding:6px 14px;border-radius:20px;
+  font-size:12px;font-weight:600;white-space:nowrap;
+  background:rgba(255,255,255,.15);color:#fff;
+  border:1.5px solid rgba(255,255,255,.2);
+  cursor:pointer;transition:all .15s;flex-shrink:0;
+}
+.chip.on{background:#fff;color:#075E54;border-color:#fff}
+
+/* ════ EXTRA BARS ════ */
+.extra-bar{
+  background:#fff;padding:10px 14px;
+  border-bottom:1px solid #E0E0E0;flex-shrink:0;
+  display:none;
+}
+.extra-bar.show{display:block}
+.extra-label{font-size:12px;font-weight:600;color:#666;margin-bottom:6px}
+.extra-row{display:flex;gap:8px;align-items:center}
+.extra-input{
+  flex:1;border:1.5px solid #DDD;border-radius:10px;
+  padding:8px 12px;font-size:14px;outline:none;font-family:inherit;
+}
+.extra-input:focus{border-color:#075E54}
+.extra-select{
+  border:1.5px solid #DDD;border-radius:10px;
+  padding:8px 10px;font-size:13px;outline:none;
+  background:#fff;font-family:inherit;color:#333;
+}
+.portion-ctrl{display:flex;align-items:center;gap:10px}
+.p-btn{
+  width:34px;height:34px;border-radius:50%;border:2px solid #075E54;
+  background:#fff;color:#075E54;font-size:18px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.p-btn:hover{background:#075E54;color:#fff}
+.p-val{font-size:20px;font-weight:700;color:#075E54;min-width:30px;text-align:center}
+.p-label{font-size:13px;color:#666}
+
+/* ════ CHAT MESSAGES ════ */
+.messages{
+  flex:1;overflow-y:auto;
+  padding:10px 8px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:#bbb;border-radius:2px}
+
+/* date divider */
+.date-divider{
+  text-align:center;margin:8px 0;
+}
+.date-divider span{
+  background:#D9D9D9;color:#555;
+  font-size:11px;padding:3px 10px;border-radius:10px;
+}
+
+/* message row */
+.msg-row{display:flex;margin-bottom:2px;gap:6px}
+.msg-row.from-me{flex-direction:row-reverse}
+
+/* avatar small */
+.msg-av{
+  width:28px;height:28px;border-radius:50%;
+  background:#128C7E;display:flex;align-items:center;
+  justify-content:center;font-size:14px;
+  flex-shrink:0;align-self:flex-end;
+}
+.msg-av.me{background:#DCF8C6;font-size:12px;color:#333}
+
+/* bubble */
+.bubble{
+  max-width:80%;border-radius:18px;
+  padding:8px 12px;
+  font-size:14px;line-height:1.5;
+  word-break:break-word;
+}
+.bubble.ai{
+  background:#fff;color:#111;
+  border-bottom-left-radius:4px;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+}
+.bubble.me{
+  background:#DCF8C6;color:#111;
+  border-bottom-right-radius:4px;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+}
+.bubble-time{
+  font-size:10px;color:#999;
+  margin-top:3px;
+  text-align:right;
+}
+.bubble.ai .bubble-time{text-align:left}
+
+/* typing */
+.bubble.typing{padding:12px 16px}
+.dot{
+  display:inline-block;width:8px;height:8px;
+  border-radius:50%;background:#999;margin:0 2px;
+  animation:bounce .9s infinite;
+}
+.dot:nth-child(2){animation-delay:.15s}
+.dot:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+/* ════ RECIPE CARD ════ */
+.recipe-card{
+  background:#fff;border-radius:14px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);margin-top:6px;
+}
+.rc-head{
+  background:#075E54;padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+}
+.rc-emoji{font-size:28px}
+.rc-title{color:#fff;font-size:15px;font-weight:700}
+.rc-meta{color:#B2DFDB;font-size:12px;margin-top:2px}
+.rc-body{padding:12px 14px}
+
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.tag{
+  padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;
+  background:#E8F5E9;color:#2E7D32;
+}
+.tag.narx{background:#FFF8E1;color:#E65100}
+.tag.vaqt{background:#E3F2FD;color:#1565C0}
+
+.ing-title{font-size:13px;font-weight:700;color:#333;margin-bottom:8px}
+.ing-list{list-style:none;margin-bottom:12px}
+.ing-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:7px 0;border-bottom:1px solid #F5F5F5;
+  font-size:13px;
+}
+.ing-item:last-child{border-bottom:none}
+.ing-name{font-weight:500;color:#111}
+.ing-qty{color:#666;font-size:12px;margin-left:4px}
+.ing-badge{
+  font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;flex-shrink:0;
+}
+.ing-badge.yes{background:#E8F5E9;color:#2E7D32}
+.ing-badge.no{background:#FFEBEE;color:#C62828}
+
+.steps-title{font-size:13px;font-weight:700;color:#333;margin-bottom:8px}
+.steps{padding-left:18px;margin-bottom:12px}
+.steps li{font-size:13px;color:#333;margin-bottom:6px;line-height:1.5}
+
+.tip-box{
+  background:#FFFDE7;border-left:3px solid #FDD835;
+  border-radius:0 8px 8px 0;padding:8px 10px;
+  font-size:12px;color:#5D4037;margin-bottom:12px;
+}
+
+.cart-btn{
+  width:100%;padding:11px;border-radius:10px;border:none;
+  background:#075E54;color:#fff;font-size:14px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:6px;transition:background .15s;
+}
+.cart-btn:hover{background:#064e46}
+.cart-btn.done{background:#9E9E9E;cursor:default}
+.cart-btn:disabled{opacity:.6;cursor:default}
+
+.save-btn{
+  width:100%;margin-top:6px;padding:9px;border-radius:10px;
+  border:1.5px solid #075E54;background:#fff;color:#075E54;
+  font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.save-btn:hover{background:#E8F5E9}
+
+/* ════ WEEK TABLE ════ */
+.week-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);margin-top:6px}
+.week-head{background:#075E54;padding:12px 14px;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.week-table{width:100%;border-collapse:collapse;font-size:12px}
+.week-table th{background:#F5F5F5;padding:7px 8px;text-align:left;font-size:11px;font-weight:700;color:#666;border-bottom:1px solid #E0E0E0}
+.week-table td{padding:7px 8px;border-bottom:1px solid #F5F5F5;color:#333;line-height:1.4}
+.week-table tr:last-child td{border-bottom:none}
+.week-table td:first-child{font-weight:700;color:#075E54;white-space:nowrap}
+.week-tags{display:flex;flex-wrap:wrap;gap:4px;padding:10px 14px}
+.week-tag{background:#E8F5E9;color:#2E7D32;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600}
+
+/* ════ SUGGESTIONS ════ */
+.sugs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sug{
+  padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;
+  background:#E8F5E9;color:#075E54;border:1px solid #A5D6A7;
+  cursor:pointer;transition:background .15s;
+}
+.sug:hover{background:#C8E6C9}
+
+/* ════ ONBOARD ════ */
+.onboard{padding:20px 14px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.onboard-icon{font-size:56px;margin-bottom:12px}
+.onboard h2{font-size:18px;font-weight:700;color:#111;margin-bottom:6px}
+.onboard p{font-size:13px;color:#666;line-height:1.6;max-width:280px;margin-bottom:18px}
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px}
+.feat{
+  background:#fff;border:1.5px solid #E0E0E0;border-radius:14px;
+  padding:12px;text-align:left;cursor:pointer;transition:all .2s;
+}
+.feat:hover{border-color:#075E54;background:#F1F8F7}
+.feat-icon{font-size:24px;margin-bottom:6px}
+.feat-name{font-size:13px;font-weight:700;color:#111;margin-bottom:3px}
+.feat-desc{font-size:11px;color:#888;line-height:1.4}
+
+/* ════ IMG PREVIEW BAR ════ */
+.img-bar{
+  background:#E1F5E1;border-bottom:1px solid #A5D6A7;
+  padding:8px 12px;display:none;align-items:center;gap:8px;
+  flex-shrink:0;
+}
+.img-bar.show{display:flex}
+.img-bar img{width:42px;height:42px;border-radius:8px;object-fit:cover}
+.img-bar-info{flex:1;min-width:0}
+.img-bar-name{font-size:12px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.img-bar-size{font-size:10px;color:#555}
+.img-bar-del{background:none;border:none;font-size:18px;cursor:pointer;color:#555;padding:4px}
+
+/* ════ INPUT AREA ════ */
+.input-area{
+  background:#F0F0F0;border-top:1px solid #DDD;
+  padding:8px 8px 10px;flex-shrink:0;
+}
+.input-row{display:flex;align-items:flex-end;gap:6px}
+.attach-label{
+  width:44px;height:44px;border-radius:50%;background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;cursor:pointer;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.12);
+}
+.msg-input{
+  flex:1;background:#fff;border:none;border-radius:22px;
+  padding:11px 16px;font-size:14px;font-family:inherit;
+  outline:none;max-height:100px;resize:none;
+  box-shadow:0 1px 3px rgba(0,0,0,.1);line-height:1.4;
+  color:#111;
+}
+.msg-input::placeholder{color:#999}
+.send-btn{
+  width:44px;height:44px;border-radius:50%;border:none;
+  background:#075E54;color:#fff;font-size:20px;
+  cursor:pointer;flex-shrink:0;display:flex;
+  align-items:center;justify-content:center;
+  box-shadow:0 2px 6px rgba(7,94,84,.35);
+  transition:background .15s;
+}
+.send-btn:hover{background:#064e46}
+.send-btn:disabled{background:#ccc;box-shadow:none;cursor:default}
+
+/* ════ SAVED SHEET ════ */
+.sheet-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;
+  display:none;align-items:flex-end;
+}
+.sheet-bg.open{display:flex}
+.sheet{
+  background:#fff;border-radius:20px 20px 0 0;width:100%;
+  max-height:80svh;overflow-y:auto;
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.sheet-handle{width:36px;height:4px;background:#E0E0E0;border-radius:2px;margin:10px auto 14px}
+.sheet-title{font-size:17px;font-weight:700;color:#111;padding:0 16px 12px;border-bottom:1px solid #F0F0F0;display:flex;align-items:center;justify-content:space-between}
+.sheet-close{background:none;border:none;font-size:22px;cursor:pointer;color:#666}
+.saved-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid #F5F5F5;cursor:pointer}
+.saved-item:hover{background:#F9F9F9}
+.saved-icon{font-size:30px;width:46px;height:46px;border-radius:12px;background:#E8F5E9;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.saved-info{flex:1;min-width:0}
+.saved-name{font-size:14px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.saved-meta{font-size:11px;color:#888;margin-top:2px}
+.saved-del{background:none;border:none;font-size:18px;cursor:pointer;color:#EF5350;padding:6px}
+.saved-empty{text-align:center;padding:32px 16px;color:#999;font-size:14px}
+
+/* ════ TOAST ════ */
+.toast{
+  position:fixed;bottom:76px;left:50%;transform:translateX(-50%);
+  background:#323232;color:#fff;border-radius:10px;
+  padding:9px 18px;font-size:13px;font-weight:500;
+  z-index:100;white-space:nowrap;
+  opacity:0;transition:opacity .25s;pointer-events:none;
+}
+.toast.show{opacity:1}
+
+/* user image in bubble */
+.bubble-img{width:180px;border-radius:12px;display:block;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="screen">
+
+<!-- ════ HEADER ════ -->
+<div class="header">
+  <button class="back-btn" onclick="history.back()">‹</button>
+  <div class="avatar">🤖</div>
+  <div class="header-info">
+    <div class="header-name">AI Shef Yordamchi</div>
+    <div class="header-status">● Onlayn · Gemini 2.5</div>
+  </div>
+  <div class="header-btns">
+    <div style="position:relative">
+      <button class="header-btn" onclick="openSaved()" title="Saqlangan reseptlar">⭐
+        <span class="badge" id="sav-badge" style="display:none">0</span>
+      </button>
+    </div>
+    <button class="header-btn" onclick="clearChat()" title="Tozalash">🗑</button>
+    <button class="header-btn" onclick="location.href='index.html'" title="Do'konga qaytish">🏪</button>
+  </div>
+</div>
+
+<!-- ════ MODE CHIPS ════ -->
+<div class="modes">
+  <div class="chip on"  data-m="photo"   onclick="setMode(this)">📸 Rasm → Resept</div>
+  <div class="chip"     data-m="have"    onclick="setMode(this)">🔄 Nimam bor?</div>
+  <div class="chip"     data-m="budget"  onclick="setMode(this)">💰 Byudjet</div>
+  <div class="chip"     data-m="week"    onclick="setMode(this)">🗓 Haftalik Menyu</div>
+  <div class="chip"     data-m="portion" onclick="setMode(this)">📊 Porsiya</div>
+</div>
+
+<!-- ════ BUDGET BAR ════ -->
+<div class="extra-bar" id="budget-bar">
+  <div class="extra-label">💰 Byudjet va ovqat turini tanlang</div>
+  <div class="extra-row">
+    <input class="extra-input" id="budget-sum" type="number" placeholder="50000 so'm" style="max-width:140px"/>
+    <select class="extra-select" id="budget-meal">
+      <option value="nonushta">🌅 Nonushta</option>
+      <option value="tushlik">☀️ Tushlik</option>
+      <option value="kechki ovqat">🌙 Kechki ovqat</option>
+    </select>
+  </div>
+</div>
+
+<!-- ════ PORTION BAR ════ -->
+<div class="extra-bar" id="portion-bar">
+  <div class="extra-label">📊 Necha kishilik porsiya?</div>
+  <div class="extra-row">
+    <div class="portion-ctrl">
+      <button class="p-btn" onclick="chgP(-1)">−</button>
+      <div class="p-val" id="p-val">4</div>
+      <button class="p-btn" onclick="chgP(1)">+</button>
+      <span class="p-label">kishi</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════ IMG PREVIEW ════ -->
+<div class="img-bar" id="img-bar">
+  <img id="img-thumb" src="" alt=""/>
+  <div class="img-bar-info">
+    <div class="img-bar-name" id="img-name">rasm.jpg</div>
+    <div class="img-bar-size" id="img-size">0 KB</div>
+  </div>
+  <button class="img-bar-del" onclick="removeImg()">✕</button>
+</div>
+
+<!-- ════ MESSAGES ════ -->
+<div class="messages" id="msgs"></div>
+
+<!-- ════ INPUT ════ -->
+<div class="input-area">
+  <div class="input-row">
+    <label class="attach-label" title="Rasm yuklash">
+      📎
+      <input type="file" accept="image/*" capture="environment"
+             id="file-in" style="display:none" onchange="onFile(this)"/>
+    </label>
+    <textarea class="msg-input" id="txt-in" rows="1"
+      placeholder="Yozing yoki rasm yüklańız..."
+      onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+    <button class="send-btn" id="send-btn" onclick="send()">➤</button>
+  </div>
+</div>
+
+<!-- ════ SAVED SHEET ════ -->
+<div class="sheet-bg" id="sheet-bg" onclick="if(event.target===this)closeSaved()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">
+      ⭐ Saqlangan Reseptlar
+      <button class="sheet-close" onclick="closeSaved()">✕</button>
+    </div>
+    <div id="saved-list"></div>
+  </div>
+</div>
+
+<!-- ════ TOAST ════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ════ SCRIPT ════ -->
+<script type="module">
+import { Auth, DB, Cart, AiChat } from './app.js';
+
+/* ── Auth guard ─────────────────────────────── */
+const me = Auth.me();
+if (!me) { location.href = 'auth.html'; throw 0; }
+
+/* ── State ──────────────────────────────────── */
+let mode    = 'photo';
+let portion = 4;
+let img     = null; // { base64, mime, name, size, dataUrl }
+let products= [];
+let saved   = JSON.parse(localStorage.getItem('fh_saved')||'[]');
+let busy    = false;
+
+DB.all().then(d => products = d).catch(()=>{});
+updateBadge();
+
+/* ── Mode ───────────────────────────────────── */
+window.setMode = el => {
+  mode = el.dataset.m;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('budget-bar').classList.toggle('show', mode==='budget');
+  document.getElementById('portion-bar').classList.toggle('show', mode==='portion');
+  const hints = {
+    photo: 'Taom rasmi yükle yoki istalgan rasm →',
+    have: 'Uyda nima bor? Masalan: sabzi, piyoz, guruch...',
+    budget: 'Byudjetni kiriting va men taom taklif qilaman',
+    week: 'Haftalik menyu berishimni xohlaysizmi? So\'rang!',
+    portion: 'Qaysi taomni necha kishilik qilishni ayting',
+  };
+  document.getElementById('txt-in').placeholder = hints[mode]||'Yozing...';
+};
+
+window.chgP = d => {
+  portion = Math.max(1, Math.min(20, portion + d));
+  document.getElementById('p-val').textContent = portion;
+};
+
+/* ── File ───────────────────────────────────── */
+window.onFile = input => {
+  const file = input.files?.[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    img = {
+      base64: e.target.result.split(',')[1],
+      mime:   file.type,
+      name:   file.name,
+      size:   file.size,
+      dataUrl: e.target.result
+    };
+    document.getElementById('img-thumb').src = img.dataUrl;
+    document.getElementById('img-name').textContent = file.name;
+    document.getElementById('img-size').textContent = (file.size/1024).toFixed(0)+' KB';
+    document.getElementById('img-bar').classList.add('show');
+    if (mode !== 'have') {
+      document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+      document.querySelector('[data-m=photo]').classList.add('on');
+      mode = 'photo';
+    }
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+};
+
+window.removeImg = () => {
+  img = null;
+  document.getElementById('img-bar').classList.remove('show');
+};
+
+/* ── Key ────────────────────────────────────── */
+window.onKey = e => { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} };
+window.resize = el => { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; };
+
+/* ── Send ───────────────────────────────────── */
+window.send = async () => {
+  if (busy) return;
+  const txt = document.getElementById('txt-in').value.trim();
+  if (!txt && !img) return;
+
+  // Remove onboarding
+  document.getElementById('onboard')?.remove();
+
+  // User bubble
+  pushUser(txt, img);
+  const curImg = img; img = null;
+  document.getElementById('img-bar').classList.remove('show');
+  document.getElementById('txt-in').value = '';
+  document.getElementById('txt-in').style.height = 'auto';
+
+  // Loading
+  const lid = pushTyping();
+  busy = true;
+  document.getElementById('send-btn').disabled = true;
+
+  try {
+    const shopList = products.slice(0,40).map(p=>p.name).join(', ');
+    let result = null;
+
+    if (mode === 'photo' && curImg) {
+      result = await AiChat.rasmResept(curImg.base64, curImg.mime, portion, shopList);
+    } else if (mode === 'have') {
+      result = await AiChat.nimamBor(txt || 'sabzavotlar', portion, shopList);
+    } else if (mode === 'budget') {
+      const summa = document.getElementById('budget-sum').value || '50000';
+      const ovq   = document.getElementById('budget-meal').value;
+      result = await AiChat.byudjet(summa, ovq, portion, shopList);
+    } else if (mode === 'week') {
+      result = await AiChat.haftalikMenu(portion, shopList);
+    } else if (mode === 'portion') {
+      result = await AiChat.porsiya(txt || 'osh', portion, shopList);
+    } else {
+      // General chat or photo without image
+      result = await AiChat.rasmResept(
+        curImg?.base64 || '',
+        curImg?.mime || 'image/jpeg',
+        portion, shopList
+      );
+    }
+
+    // Fallback demo
+    if (!result) {
+      result = AiChat.demo(mode, portion);
+      showToast('⚠️ Demo rejim — Gemini API key kiritilmagan');
+    }
+
+    removeEl(lid);
+    render(result, txt);
+  } catch(e) {
+    removeEl(lid);
+    pushAI(`❌ Xato: ${e.message}. Iltimos qayta urinib ko'ring.`, []);
+  }
+
+  busy = false;
+  document.getElementById('send-btn').disabled = false;
+  scrollBot();
+};
+
+/* ── Render result ──────────────────────────── */
+function render(data, userText) {
+  // Haftalik menyu
+  if (data?.hafta) { pushWeek(data); return; }
+  // Multiple dishes
+  if (data?.taomlar) { data.taomlar.forEach(t => pushRecipe(t)); return; }
+  // Single recipe
+  if (data?.taom) { pushRecipe(data); return; }
+  // Plain text
+  if (data?.text) { pushAI(data.text, sugList()); return; }
+  pushAI(JSON.stringify(data), []);
+}
+
+function sugList() {
+  const m = {
+    photo:  ['📸 Boshqa rasm', '📊 Porsiyani o\'zgartir'],
+    have:   ['🔄 Yana variantlar', '💰 Tejamli variant'],
+    budget: ['💰 Kamroq byudjet', '📊 Ko\'proq kishi'],
+    week:   ['🗓 Keyingi hafta', '📊 Ko\'proq kishi'],
+    portion:['📊 Ko\'proq kishi', '📸 Boshqa taom'],
+  };
+  return m[mode]||[];
+}
+
+/* ── Recipe card ────────────────────────────── */
+function pushRecipe(r) {
+  const foundProds = (r.ingredientlar||[])
+    .filter(i => i.dukonda_bor)
+    .map(i => products.find(p => p.name.toLowerCase().includes(i.nom.toLowerCase().split(' ')[0])))
+    .filter(Boolean);
+
+  const uid = 'r'+Date.now()+Math.random().toString(36).slice(2,5);
+  const ings = (r.ingredientlar||[]).map(i => `
+    <li class="ing-item">
+      <span><span class="ing-name">${i.nom}</span><span class="ing-qty">${i.miqdor||''}</span></span>
+      <span class="ing-badge ${i.dukonda_bor?'yes':'no'}">${i.dukonda_bor?"✓ Do'konda":"✗ Kerak"}</span>
+    </li>`).join('');
+
+  const steps = (r.qadamlar||[]).map(s=>`<li>${s}</li>`).join('');
+  const tip   = r.maslahat || r.tejash_maslahati || '';
+
+  const card = `
+<div class="recipe-card">
+  <div class="rc-head">
+    <div class="rc-emoji">${r.emoji||'🍽️'}</div>
+    <div>
+      <div class="rc-title">${r.taom}</div>
+      <div class="rc-meta">${[r.vaqt,r.qiyinlik,r.porsiya?r.porsiya+' kishi':''].filter(Boolean).join(' · ')}</div>
+    </div>
+  </div>
+  <div class="rc-body">
+    <div class="tags">
+      ${r.vaqt?`<span class="tag vaqt">⏱ ${r.vaqt}</span>`:''}
+      ${r.qiyinlik?`<span class="tag">${r.qiyinlik}</span>`:''}
+      ${r.jami_narx?`<span class="tag narx">💰 ${r.jami_narx.toLocaleString()} so'm</span>`:''}
+    </div>
+    ${ings?`<div class="ing-title">📦 Ingredientlar</div><ul class="ing-list">${ings}</ul>`:''}
+    ${steps?`<div class="steps-title">📋 Tayyorlash</div><ol class="steps">${steps}</ol>`:''}
+    ${tip?`<div class="tip-box">💡 ${tip}</div>`:''}
+    <button class="cart-btn" id="${uid}"
+      onclick="addCart('${uid}',${JSON.stringify(foundProds).replace(/"/g,'&quot;')})"
+      ${foundProds.length===0?'disabled':''}>
+      🛒 ${foundProds.length?foundProds.length+` ta mahsulot savatga qo'shish`:"Do'konda mahsulot topilmadi"}
+    </button>
+    <button class="save-btn" onclick="saveRec(${JSON.stringify(r).replace(/"/g,'&quot;')})">⭐ Reseptni saqlash</button>
+  </div>
+</div>`;
+
+  const sugs = sugList();
+  const html = `
+<div class="msg-row" id="${uid}-row">
+  <div class="msg-av">🤖</div>
+  <div style="max-width:88%">
+    <div class="bubble ai" style="padding:0;background:transparent;box-shadow:none">${card}</div>
+    ${sugs.length?`<div class="sugs">${sugs.map(s=>`<span class="sug" onclick="quickSend('${s}')">${s}</span>`).join('')}</div>`:''}
+    <div class="bubble-time">${now()}</div>
+  </div>
+</div>`;
+  pushHTML(html);
+}
+
+/* ── Week menu ──────────────────────────────── */
+function pushWeek(data) {
+  const rows = (data.hafta||[]).map(d=>`
+    <tr>
+      <td>${d.kun}</td>
+      <td>${d.nonushta?.emoji||''} ${d.nonushta?.taom||''}</td>
+      <td>${d.tushlik?.emoji||''} ${d.tushlik?.taom||''}</td>
+      <td>${d.kechki?.emoji||''} ${d.kechki?.taom||''}</td>
+    </tr>`).join('');
+  const ingrs = data.kerakli_mahsulotlar||[];
+  const foundProds = ingrs.map(n=>products.find(p=>p.name.toLowerCase().includes(n.toLowerCase().split(' ')[0]))).filter(Boolean);
+  const wid = 'w'+Date.now();
+  const html = `
+<div class="msg-row">
+  <div class="msg-av">🤖</div>
+  <div style="max-width:92%">
+    <div class="bubble ai" style="padding:0;background:transparent;box-shadow:none">
+      <div class="week-card">
+        <div class="week-head">🗓 ${portion} kishilik Haftalik Menyu</div>
+        <div style="overflow-x:auto">
+          <table class="week-table">
+            <thead><tr><th>Kun</th><th>Nonushta</th><th>Tushlik</th><th>Kechki</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        ${ingrs.length?`
+        <div style="padding:10px 14px 6px;font-size:12px;font-weight:700;color:#333">Kerakli mahsulotlar:</div>
+        <div class="week-tags">${ingrs.map(n=>`<span class="week-tag">${n}</span>`).join('')}</div>
+        <div style="padding:0 14px 14px">
+          <button class="cart-btn" id="${wid}"
+            onclick="addCart('${wid}',${JSON.stringify(foundProds).replace(/"/g,'&quot;')})"
+            ${foundProds.length===0?'disabled':''}>
+            🛒 ${foundProds.length?foundProds.length+` ta mahsulot savatga`:"Do'konda topilmadi"}
+          </button>
+        </div>`:''}
+      </div>
+    </div>
+    <div class="bubble-time">${now()}</div>
+  </div>
+</div>`;
+  pushHTML(html);
+}
+
+/* ── Add to cart ────────────────────────────── */
+window.addCart = (uid, prods) => {
+  if (!prods?.length) return;
+  prods.forEach(p => Cart.qos(p));
+  const btn = document.getElementById(uid);
+  if (btn) { btn.textContent = '✅ Savatga qo\'shildi!'; btn.classList.add('done'); btn.disabled=true; }
+  showToast(`✅ ${prods.length} ta mahsulot savatga qo'shildi!`);
+};
+
+/* ── Save recipe ────────────────────────────── */
+window.saveRec = r => {
+  if (saved.find(s=>s.taom===r.taom)) { showToast('⚠️ Bu resept allaqachon saqlangan'); return; }
+  r._at = Date.now();
+  saved.unshift(r);
+  if (saved.length>30) saved.pop();
+  localStorage.setItem('fh_saved', JSON.stringify(saved));
+  updateBadge();
+  showToast('⭐ Resept saqlandi!');
+};
+
+/* ── Saved sheet ────────────────────────────── */
+window.openSaved = () => {
+  const el = document.getElementById('saved-list');
+  if (!saved.length) {
+    el.innerHTML = '<div class="saved-empty">Saqlangan reseptlar yo\'q</div>';
+  } else {
+    el.innerHTML = saved.map((r,i)=>`
+      <div class="saved-item" onclick="loadSaved(${i})">
+        <div class="saved-icon">${r.emoji||'🍽️'}</div>
+        <div class="saved-info">
+          <div class="saved-name">${r.taom}</div>
+          <div class="saved-meta">⏱ ${r.vaqt||'—'} · ${r.qiyinlik||''}</div>
+        </div>
+        <button class="saved-del" onclick="event.stopPropagation();delSaved(${i})">🗑</button>
+      </div>`).join('');
+  }
+  document.getElementById('sheet-bg').classList.add('open');
+};
+
+window.closeSaved = ()=>document.getElementById('sheet-bg').classList.remove('open');
+
+window.loadSaved = i => {
+  closeSaved();
+  document.getElementById('onboard')?.remove();
+  pushUser(`⭐ "${saved[i].taom}" resepti`);
+  pushRecipe(saved[i]);
+  scrollBot();
+};
+
+window.delSaved = i => {
+  saved.splice(i,1);
+  localStorage.setItem('fh_saved',JSON.stringify(saved));
+  updateBadge(); openSaved();
+};
+
+function updateBadge() {
+  const b = document.getElementById('sav-badge');
+  b.textContent = saved.length;
+  b.style.display = saved.length?'flex':'none';
+}
+
+/* ── Clear chat ─────────────────────────────── */
+window.clearChat = () => {
+  if (!confirm('Chatni tozalash?')) return;
+  document.getElementById('msgs').innerHTML = '';
+  showOnboard();
+};
+
+/* ── Quick send ─────────────────────────────── */
+window.quickSend = txt => {
+  document.getElementById('txt-in').value = txt;
+  send();
+};
+
+/* ── DOM helpers ────────────────────────────── */
+function pushUser(txt, curImg) {
+  if (!txt && !curImg) return;
+  const html = `
+<div class="msg-row from-me">
+  <div class="msg-av me">👤</div>
+  <div>
+    ${curImg?`<img class="bubble-img" src="${curImg.dataUrl}" alt=""/>`:''}
+    ${txt?`<div class="bubble me">${esc(txt)}</div>`:''}
+    <div class="bubble-time" style="text-align:right">${now()}</div>
+  </div>
+</div>`;
+  pushHTML(html);
+}
+
+function pushAI(txt, sugs=[]) {
+  const html = `
+<div class="msg-row">
+  <div class="msg-av">🤖</div>
+  <div style="max-width:80%">
+    <div class="bubble ai">${txt}${sugs.length?`<div class="sugs">${sugs.map(s=>`<span class="sug" onclick="quickSend('${s}')">${s}</span>`).join('')}</div>`:''}</div>
+    <div class="bubble-time">${now()}</div>
+  </div>
+</div>`;
+  pushHTML(html);
+}
+
+function pushTyping() {
+  const id = 'ty'+Date.now();
+  pushHTML(`
+<div class="msg-row" id="${id}">
+  <div class="msg-av">🤖</div>
+  <div class="bubble ai typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+</div>`);
+  return id;
+}
+
+function pushHTML(html) {
+  document.getElementById('msgs').insertAdjacentHTML('beforeend', html);
+  scrollBot();
+}
+
+function removeEl(id) { document.getElementById(id)?.remove(); }
+function scrollBot() { const m=document.getElementById('msgs'); m.scrollTop=m.scrollHeight; }
+function now() { return new Date().toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'}); }
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+/* ── Toast ──────────────────────────────────── */
+window.showToast = msg => {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+};
+
+/* ── Onboarding ─────────────────────────────── */
+function showOnboard() {
+  const feats = [
+    {icon:'📸',name:'Rasm → Resept',desc:'Taom rasmi yükle, AI resept tüzadi va savatga qo\'shadi',act:"document.querySelector('[data-m=photo]').click();document.getElementById('file-in').click()"},
+    {icon:'🔄',name:'Nimam bor?',  desc:'Uyda bor mahsulotlarni aytasiz, AI taom taklif qiladi',act:"document.querySelector('[data-m=have]').click();document.getElementById('txt-in').focus()"},
+    {icon:'💰',name:'Byudjet',      desc:'Byudjetingizga mos eng yaxshi taomni topadi',act:"document.querySelector('[data-m=budget]').click();document.getElementById('budget-sum').focus()"},
+    {icon:'🗓',name:'Haftalik Menyu',desc:'5 kunlik to\'liq ovqat rejasi tuzib beradi',act:"document.querySelector('[data-m=week]').click();quickSend('Haftalik menyu tuz')"},
+    {icon:'📊',name:'Porsiya',       desc:'Istalgan taomni istalgan kishilik hisoblab beradi',act:"document.querySelector('[data-m=portion]').click();document.getElementById('txt-in').focus()"},
+    {icon:'⭐',name:'Saqlangan',     desc:'Sevimli reseptlaringizni saqlang va qayta ishlating',act:"openSaved()"},
+  ];
+  const html = `
+<div id="onboard" class="onboard">
+  <div class="onboard-icon">🤖</div>
+  <h2>Salom! Men AI Shef Yordamchiman</h2>
+  <p>Taom rasmi yükle, uyda borlarni ayt, byudjet kirit — men resept tüzib, kerakli mahsulotlarni savatga qo'shaman!</p>
+  <div class="feat-grid">
+    ${feats.map(f=>`
+    <div class="feat" onclick="${f.act}">
+      <div class="feat-icon">${f.icon}</div>
+      <div class="feat-name">${f.name}</div>
+      <div class="feat-desc">${f.desc}</div>
+    </div>`).join('')}
+  </div>
+</div>`;
+  document.getElementById('msgs').insertAdjacentHTML('beforeend', html);
+}
+
+/* ── Date divider ───────────────────────────── */
+const todayStr = new Date().toLocaleDateString('uz-UZ',{day:'numeric',month:'long'});
+document.getElementById('msgs').insertAdjacentHTML('beforeend',`<div class="date-divider"><span>${todayStr}</span></div>`);
+
+/* ── Init ───────────────────────────────────── */
+showOnboard();
+</script>
+</body>
+</html>

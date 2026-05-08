@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="kaa">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Fresh Harvest — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,700&display=swap" rel="stylesheet"/>
+<style>
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root{ --g:#10b981; --gd:#059669; --gp:#d1fae5; --ink:#1a1a1a; --muted:#6b7280; --surface:#f9fafb; --border:#e5e7eb; }
+body{ margin:0; background:var(--ink); min-height:100vh; font-family:'DM Sans',sans-serif; padding-bottom:40px; color:#fff; }
+
+.hd{ position:sticky; top:0; z-index:50; background:rgba(26,26,26,.95); backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,.08); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; }
+.hd-logo{ font-family:'Fraunces',serif; font-size:18px; }
+.hd-dot{ color:var(--g); }
+
+.stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:14px 16px; }
+.stat{ background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); border-radius:20px; padding:14px; }
+.stat-val{ font-family:'Fraunces',serif; font-size:26px; color:#fff; margin-bottom:2px; }
+.stat-lbl{ font-size:11px; color:rgba(255,255,255,.4); font-weight:500; }
+
+.tabs2{ display:flex; gap:8px; padding:0 16px 14px; }
+.tab2{ flex:1; padding:10px; border-radius:14px; border:1.5px solid rgba(255,255,255,.1); background:transparent; color:rgba(255,255,255,.4); font-size:13px; font-weight:600; cursor:pointer; transition:all .18s; font-family:'DM Sans',sans-serif; }
+.tab2.on{ background:var(--g); border-color:var(--g); color:#fff; }
+
+.filters{ display:flex; gap:6px; overflow-x:auto; padding:0 16px 12px; scrollbar-width:none; }
+.filters::-webkit-scrollbar{ display:none; }
+.fc{ flex-shrink:0; padding:6px 14px; border-radius:50px; border:1.5px solid rgba(255,255,255,.1); background:transparent; color:rgba(255,255,255,.4); font-size:12px; font-weight:500; cursor:pointer; transition:all .18s; }
+.fc.on{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25); color:#fff; }
+
+.prow{ margin:0 16px 8px; background:rgba(255,255,255,.05); border-radius:20px; border:1px solid rgba(255,255,255,.07); overflow:hidden; }
+.prow-inner{ display:flex; align-items:center; gap:12px; padding:12px; }
+.prow-img{ width:56px; height:56px; border-radius:14px; object-fit:cover; background:rgba(255,255,255,.1); flex-shrink:0; }
+.prow-name{ font-size:14px; font-weight:600; color:#fff; margin:0 0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.prow-meta{ font-size:11px; color:rgba(255,255,255,.35); margin:0 0 3px; }
+.prow-price{ font-family:'Fraunces',serif; font-size:15px; color:var(--g); }
+.prow-acts{ display:flex; flex-direction:column; gap:5px; margin-left:auto; flex-shrink:0; }
+.act-btn{ border:none; border-radius:10px; padding:7px 11px; font-size:12px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; }
+.edit-btn{ background:rgba(59,130,246,.2); color:#93c5fd; }
+.del-btn{ background:rgba(239,68,68,.15); color:#fca5a5; }
+
+.finp{ width:100%; background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.1); border-radius:14px; padding:12px 13px; font-size:14px; font-weight:500; color:#fff; outline:none; transition:border-color .2s; font-family:'DM Sans',sans-serif; }
+.finp:focus{ border-color:var(--g); }
+.finp::placeholder{ color:rgba(255,255,255,.25); }
+.fsel{ appearance:none; cursor:pointer; }
+.flbl{ font-size:11px; font-weight:600; color:rgba(255,255,255,.35); letter-spacing:.5px; text-transform:uppercase; margin-bottom:6px; display:block; }
+
+.rzona{ background:rgba(255,255,255,.04); border:2px dashed rgba(255,255,255,.12); border-radius:16px; min-height:130px; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; overflow:hidden; transition:border-color .2s; }
+.rzona:hover,.rzona.drag{ border-color:var(--g); }
+.rzona input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+.rzona img.rp{ width:100%; height:130px; object-fit:cover; display:none; border-radius:14px; }
+.rzona-hint{ text-align:center; padding:16px; pointer-events:none; }
+
+.pbar{ height:3px; background:rgba(255,255,255,.08); border-radius:2px; margin-top:5px; overflow:hidden; display:none; }
+.pfill{ height:100%; width:0%; background:var(--g); border-radius:2px; transition:width .25s; }
+
+.sbtn2{ width:100%; padding:14px; border-radius:16px; background:var(--g); color:#fff; font-size:14px; font-weight:600; border:none; cursor:pointer; margin-top:18px; font-family:'DM Sans',sans-serif; transition:opacity .15s; }
+.sbtn2:active,.sbtn2:disabled{ opacity:.7; }
+.cbtn2{ width:100%; padding:12px; border-radius:16px; background:rgba(255,255,255,.07); color:rgba(255,255,255,.5); font-size:13px; font-weight:500; border:none; cursor:pointer; margin-top:6px; font-family:'DM Sans',sans-serif; }
+
+.fab{ position:fixed; bottom:22px; right:18px; width:54px; height:54px; border-radius:50%; background:var(--g); color:#fff; border:none; font-size:26px; cursor:pointer; box-shadow:0 6px 22px rgba(16,185,129,.5); z-index:100; display:flex; align-items:center; justify-content:center; transition:transform .15s; }
+.fab:active{ transform:scale(.9); }
+
+.toast{ position:fixed; top:72px; left:50%; transform:translateX(-50%); background:var(--g); color:#fff; padding:10px 20px; border-radius:12px; font-size:13px; font-weight:600; z-index:500; white-space:nowrap; opacity:0; transition:opacity .25s; pointer-events:none; }
+.toast.on{ opacity:1; }
+
+.cfbg{ position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:300; display:none; align-items:center; justify-content:center; padding:20px; }
+.cfbg.on{ display:flex; }
+.cfcard{ background:#1e1e1e; border-radius:24px; padding:24px; max-width:280px; width:100%; text-align:center; }
+
+.fm-modal{ position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:200; display:none; align-items:flex-end; }
+.fm-modal.on{ display:flex; }
+.fm-panel{ background:#1a1a1a; border-radius:28px 28px 0 0; width:100%; max-height:92vh; overflow-y:auto; padding:8px 18px 36px; border-top:1px solid rgba(255,255,255,.08); }
+.fm-bar{ width:36px; height:3px; background:rgba(255,255,255,.15); border-radius:2px; margin:10px auto 18px; }
+
+.ai-btn-sm{ background:rgba(139,92,246,.25); color:#c4b5fd; border:none; border-radius:10px; padding:5px 12px; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:opacity .15s; }
+.ai-btn-sm:disabled{ opacity:.5; }
+
+@keyframes fadeUp{ from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)} }
+.prow{ animation:fadeUp .25s ease; }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- Header -->
+<div class="hd">
+  <div class="hd-logo">Fresh<span class="hd-dot">.</span>Harvest</div>
+  <div style="display:flex;gap:8px">
+    <a href="index.html" style="padding:7px 14px;border-radius:12px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);font-size:12px;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,.1)">👁 Dúkan</a>
+    <button onclick="Auth.logout();location.href='auth.html'" style="padding:7px 12px;border-radius:12px;background:rgba(239,68,68,.15);color:#fca5a5;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🚪</button>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-val" id="s-jami">–</div><div class="stat-lbl">📦 Jámı Tovar</div></div>
+  <div class="stat"><div class="stat-val" id="s-kat">–</div><div class="stat-lbl">🏷 Kategoriya</div></div>
+  <div class="stat"><div class="stat-val" id="s-orta">–</div><div class="stat-lbl">💰 O'rtacha Baha</div></div>
+  <div class="stat"><div class="stat-val" id="s-bar">–</div><div class="stat-lbl">✅ Aktiv</div></div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs2">
+  <button class="tab2 on" id="tb-list" onclick="showPanel('list',this)">📦 Tovarlar</button>
+  <button class="tab2"    id="tb-form" onclick="showPanel('form',this)">➕ Jańa Qosıw</button>
+</div>
+
+<!-- LIST Panel -->
+<div id="pt-list">
+  <div class="filters">
+    <div class="fc on" onclick="filt('',this)">Barlıq</div>
+    <div class="fc" onclick="filt('miyweler',this)">🍎 Miyweler</div>
+    <div class="fc" onclick="filt('sut',this)">🥛 Sút</div>
+    <div class="fc" onclick="filt('paliz',this)">🥦 Palız</div>
+    <div class="fc" onclick="filt('nan',this)">🍞 Nan</div>
+  </div>
+  <div id="plist"><div style="text-align:center;padding:40px;color:rgba(255,255,255,.2);font-size:13px">⏳ Yuklanip atır...</div></div>
+</div>
+
+<!-- FORM Tab Panel (for quick access) -->
+<div id="pt-form" style="display:none;padding:0 16px">
+  <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:24px;padding:20px">
+    <div style="font-family:'Fraunces',serif;font-size:17px;margin-bottom:18px">➕ Jańa Tovar Qosıw</div>
+    <div id="qtab-form"></div>
+  </div>
+</div>
+
+<!-- FAB -->
+<div id="main-fab" class="fab" onclick="openForm(null)">+</div>
+
+<!-- FORM MODAL (for edit/quick add) -->
+<div class="fm-modal" id="fmm" onclick="if(event.target===this)closeForm()">
+  <div class="fm-panel">
+    <div class="fm-bar"></div>
+    <div id="fm-title" style="font-family:'Fraunces',serif;font-size:18px;margin-bottom:18px"></div>
+    <div id="fm-body"></div>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="cfbg" id="cfbg">
+  <div class="cfcard">
+    <div style="font-size:36px;margin-bottom:10px">🗑️</div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:6px">Haqıyqatdan óshiresizbe?</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.35);margin-bottom:18px">Bul ámel artqa qaytarılmaydi</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="document.getElementById('cfbg').classList.remove('on')"
+        style="flex:1;padding:11px;border-radius:14px;background:rgba(255,255,255,.08);color:#fff;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">Joq</button>
+      <button id="cf-ok"
+        style="flex:1;padding:11px;border-radius:14px;background:rgba(239,68,68,.8);color:#fff;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">Óshir</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { Auth, DB, Storage, AI, fmt, catIcon, plImg } from './app.js';
+window.Auth = Auth;
+
+const user = Auth.me();
+if (!user || user.role !== 'admin') { location.href = 'auth.html'; throw 0; }
+
+let all = [], filtKat = '', editId = null;
+
+// Real-time
+const unsub = DB.realtime((rows) => { all = rows; statUpdate(); listRender(); });
+window.addEventListener('pagehide', () => unsub?.());
+
+function statUpdate() {
+  document.getElementById('s-jami').textContent = all.length;
+  document.getElementById('s-kat').textContent  = new Set(all.map(p=>p.category)).size;
+  document.getElementById('s-orta').textContent = all.length ? Math.round(all.reduce((s,p)=>s+p.price,0)/all.length/1000)+'K' : '0';
+  document.getElementById('s-bar').textContent  = all.length;
+}
+
+function listRender() {
+  const list = filtKat ? all.filter(p => p.category === filtKat) : all;
+  const el = document.getElementById('plist');
+  if (!list.length) { el.innerHTML = `<div style="text-align:center;padding:40px;color:rgba(255,255,255,.2);font-size:13px">📦 Tovarlar yoq</div>`; return; }
+  el.innerHTML = list.map(p => `
+    <div class="prow">
+      <div class="prow-inner">
+        <img class="prow-img" src="${p.image_url||plImg(p.name)}" alt="${p.name}" onerror="this.src='${plImg(p.name)}'"/>
+        <div style="flex:1;min-width:0">
+          <p class="prow-name">${p.name}</p>
+          <p class="prow-meta">${catIcon(p.category)} · ${p.calories||0} kkal</p>
+          <p class="prow-price">${fmt(p.price)}</p>
+        </div>
+        <div class="prow-acts">
+          <button class="act-btn edit-btn" onclick="openForm(${p.id})">✏️</button>
+          <button class="act-btn del-btn" onclick="confirmDel(${p.id})">🗑️</button>
+        </div>
+      </div>
+      ${p.tavsif?`<div style="padding:0 12px 10px;font-size:11px;color:rgba(255,255,255,.3)">${p.tavsif}</div>`:''}
+    </div>`).join('');
+}
+
+window.filt = (k, el) => {
+  filtKat = k;
+  document.querySelectorAll('.fc').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on'); listRender();
+};
+
+window.showPanel = (p, el) => {
+  document.querySelectorAll('.tab2').forEach(t=>t.classList.remove('on')); el.classList.add('on');
+  document.getElementById('pt-list').style.display = p==='list'?'block':'none';
+  document.getElementById('pt-form').style.display = p==='form'?'block':'none';
+  document.getElementById('main-fab').style.display = p==='list'?'flex':'none';
+  if (p==='form') renderFormInto('qtab-form', null);
+};
+
+// ── Form builder ─────────────────────────────────────────
+function formHTML(p) {
+  const v = k => p?.[k]??'';
+  return `
+    <div style="margin-bottom:12px">
+      <label class="flbl">Tovar ati *</label>
+      <input id="f-at" class="finp" type="text" placeholder="mısal: Taze alma" value="${v('name')}"/>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="flbl">Kategoriya *</label>
+      <select id="f-kat" class="finp fsel">
+        ${['miyweler','sut','paliz','nan'].map(k=>`<option value="${k}" ${v('category')===k?'selected':''}>${catIcon(k)} ${k}</option>`).join('')}
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div><label class="flbl">Baha (so'm) *</label><input id="f-baha" class="finp" type="number" placeholder="10000" value="${v('price')||''}"/></div>
+      <div><label class="flbl">Kaloriya</label><input id="f-kal" class="finp" type="number" placeholder="50" value="${v('calories')||''}"/></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <label class="flbl" style="margin:0">Tavsif</label>
+        <button class="ai-btn-sm" id="ai-tavsif-btn" onclick="genTavsif()" type="button">✨ AI Jaratıw</button>
+      </div>
+      <textarea id="f-tavsif" class="finp" style="resize:none;min-height:56px" placeholder="Avtomatik yoki qo'lda...">${v('tavsif')}</textarea>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="flbl">Rasm</label>
+      <div class="rzona" id="rzona"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="dropImg(event)">
+        <input type="file" accept="image/*" capture="environment" id="f-file" onchange="pickImg(this)"/>
+        <div id="r-hint" class="rzona-hint" ${v('image_url')?'style="display:none"':''}>
+          <div style="font-size:28px;margin-bottom:6px">📷</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.3)">Galerya · Kamera · Drag&Drop</div>
+        </div>
+        <img class="rp" id="r-prev" ${v('image_url')?`src="${v('image_url')}" style="display:block"`:''}/>
+      </div>
+      <div class="pbar" id="pbar"><div class="pfill" id="pfill"></div></div>
+      <div id="img-status" style="font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;min-height:14px"></div>
+    </div>
+    <input type="hidden" id="f-imgurl" value="${v('image_url')||''}"/>
+    <button class="sbtn2" id="f-save" onclick="saveForm()">${p?'💾 Ózgerislerni Saqlaw':'✅ Tovar Qosıw'}</button>
+    <button class="cbtn2" onclick="closeForm()">Bekor qılıw</button>`;
+}
+
+function renderFormInto(containerId, product) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = formHTML(product);
+  if (product?.image_url) {
+    const prev = document.getElementById('r-prev');
+    if (prev) { prev.src = product.image_url; prev.style.display='block'; }
+    const hint = document.getElementById('r-hint');
+    if (hint) hint.style.display='none';
+  }
+}
+
+window.openForm = id => {
+  editId = id;
+  const p = id ? all.find(x=>x.id===id) : null;
+  document.getElementById('fm-title').textContent = id ? '✏️ Tovarni Tahrir Etiw' : '➕ Jańa Tovar Qosıw';
+  renderFormInto('fm-body', p);
+  document.getElementById('fmm').classList.add('on');
+};
+window.closeForm = () => { document.getElementById('fmm').classList.remove('on'); editId=null; };
+
+window.saveForm = async () => {
+  const at = document.getElementById('f-at')?.value.trim();
+  const baha = Number(document.getElementById('f-baha')?.value);
+  if (!at) return showToast('❌ Tovar atın kiritıń!');
+  if (!baha||baha<=0) return showToast('❌ Dúris baha kiriting!');
+  const d = {
+    name: at, price: baha,
+    category: document.getElementById('f-kat')?.value,
+    image_url: document.getElementById('f-imgurl')?.value||'',
+    calories: Number(document.getElementById('f-kal')?.value)||0,
+    tavsif: document.getElementById('f-tavsif')?.value.trim()||'',
+  };
+  const btn = document.getElementById('f-save');
+  btn.disabled=true; btn.textContent='Saqlap atır...';
+  try {
+    if (editId) { await DB.update(editId, d); showToast('✅ Tovar ózgertirildi!'); }
+    else        { await DB.add(d);            showToast('✅ Jańa tovar qosıldı!'); }
+    closeForm();
+    const qtf = document.getElementById('qtab-form');
+    if (qtf?.innerHTML) qtf.innerHTML = formHTML(null);
+  } catch(e) { showToast('❌ '+e.message); }
+  finally { if(btn){btn.disabled=false; btn.textContent=editId?'💾 Saqlaw':'✅ Tovar Qosıw';} }
+};
+
+window.genTavsif = async () => {
+  const at = document.getElementById('f-at')?.value.trim();
+  if (!at) return showToast('❌ Avvalo tovar atın kiritıń!');
+  const btn = document.getElementById('ai-tavsif-btn');
+  btn.disabled=true; btn.textContent='⏳...';
+  try {
+    const kat = document.getElementById('f-kat')?.value||'';
+    const t = await AI.tavsif(at, kat);
+    const ta = document.getElementById('f-tavsif');
+    if (ta) ta.value = t;
+    showToast('✅ AI tavsifi jaratıldı!');
+  } catch(e){ showToast('❌ '+e.message); }
+  finally{ btn.disabled=false; btn.textContent='✨ AI Jaratıw'; }
+};
+
+window.pickImg = async input => {
+  const file = input.files?.[0]; if(!file) return;
+  await uploadImg(file);
+};
+window.dropImg = async e => {
+  e.preventDefault(); document.getElementById('rzona').classList.remove('drag');
+  const file = e.dataTransfer?.files?.[0];
+  if (file?.type.startsWith('image/')) await uploadImg(file);
+};
+
+async function uploadImg(file) {
+  const hint = document.getElementById('r-hint');
+  const prev = document.getElementById('r-prev');
+  const pbar = document.getElementById('pbar');
+  const pfill= document.getElementById('pfill');
+  const stat = document.getElementById('img-status');
+  const urlEl= document.getElementById('f-imgurl');
+  const localUrl = URL.createObjectURL(file);
+  if(hint) hint.style.display='none';
+  if(prev){ prev.src=localUrl; prev.style.display='block'; }
+  if(pbar) pbar.style.display='block'; if(pfill) pfill.style.width='0%';
+  if(stat) stat.textContent='Yuklanip atır...';
+  try {
+    const url = await Storage.upload(file, pct=>{ if(pfill) pfill.style.width=pct+'%'; });
+    if(urlEl) urlEl.value=url;
+    if(prev) prev.src=url;
+    URL.revokeObjectURL(localUrl);
+    if(stat){ stat.textContent='✅ Rasm saqlandi!'; stat.style.color='#10b981'; }
+    setTimeout(()=>{ if(pbar)pbar.style.display='none'; if(stat)stat.textContent=''; },2000);
+  } catch(e){
+    if(prev){prev.style.display='none';} if(hint)hint.style.display='';
+    if(pbar)pbar.style.display='none';
+    if(stat){ stat.textContent='❌ '+e.message; stat.style.color='#fca5a5'; }
+    URL.revokeObjectURL(localUrl);
+  }
+}
+
+// Delete confirm
+window.confirmDel = id => {
+  document.getElementById('cfbg').classList.add('on');
+  document.getElementById('cf-ok').onclick = async () => {
+    try { await DB.remove(id); document.getElementById('cfbg').classList.remove('on'); showToast('🗑️ Tovar óshirildi!'); }
+    catch(e){ showToast('❌ '+e.message); }
+  };
+};
+
+function showToast(m) {
+  const el=document.getElementById('toast'); el.textContent=m; el.classList.add('on');
+  setTimeout(()=>el.classList.remove('on'),2600);
+}
+</script>
+</body>
+</html>

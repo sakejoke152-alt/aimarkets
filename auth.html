@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="kaa">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Fresh Harvest — Kiriw</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,500&display=swap" rel="stylesheet"/>
+<style>
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root{ --g:#10b981; --gd:#059669; --gp:#d1fae5; --ink:#1a1a1a; --muted:#6b7280; --border:#e5e7eb; }
+body{ margin:0; min-height:100vh; font-family:'DM Sans',sans-serif; background:#f9fafb; display:flex; align-items:center; justify-content:center; padding:20px; }
+.card{ background:#fff; border-radius:28px; box-shadow:0 2px 24px rgba(0,0,0,.07); padding:32px 24px; width:100%; max-width:360px; }
+.logo-wrap{ text-align:center; margin-bottom:24px; }
+.logo-ico{ width:72px; height:72px; border-radius:22px; background:var(--ink); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 14px; }
+.logo-name{ font-family:'Fraunces',serif; font-size:24px; color:var(--ink); }
+.logo-dot{ color:var(--g); }
+.logo-sub{ font-size:13px; color:var(--muted); margin-top:4px; }
+.tabs{ display:flex; background:#f3f4f6; border-radius:14px; padding:4px; margin-bottom:18px; gap:4px; }
+.tab{ flex:1; padding:9px; border-radius:10px; border:none; font-size:13.5px; font-weight:600; cursor:pointer; transition:all .18s; font-family:'DM Sans',sans-serif; background:transparent; color:var(--muted); }
+.tab.on{ background:#fff; color:var(--ink); box-shadow:0 1px 6px rgba(0,0,0,.08); }
+.lbl{ font-size:11px; font-weight:600; color:var(--muted); letter-spacing:.5px; text-transform:uppercase; margin-bottom:6px; display:block; }
+.inp{ width:100%; border:1.5px solid var(--border); border-radius:14px; padding:13px 14px; font-size:15px; color:var(--ink); outline:none; font-family:'DM Sans',sans-serif; transition:border-color .2s; background:#fff; margin-bottom:12px; }
+.inp:focus{ border-color:var(--g); }
+.inp::placeholder{ color:#9ca3af; }
+.err{ background:#fef2f2; border:1.5px solid #fecaca; border-radius:12px; padding:10px 14px; font-size:13px; color:#dc2626; font-weight:500; margin-bottom:12px; display:none; }
+.sbtn{ width:100%; padding:14px; border-radius:16px; background:var(--ink); color:#fff; font-size:14.5px; font-weight:600; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; transition:opacity .15s; margin-top:4px; }
+.sbtn:active{ opacity:.85; }
+.sbtn:disabled{ opacity:.5; cursor:not-allowed; }
+.sep{ display:flex; align-items:center; gap:10px; color:#d1d5db; font-size:12px; margin:16px 0; }
+.sep::before,.sep::after{ content:''; flex:1; height:1px; background:#e5e7eb; }
+.demo-box{ background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:16px; padding:12px 14px; font-size:12px; color:var(--g); font-weight:500; }
+.demo-row{ cursor:pointer; padding:3px 0; }
+.demo-row:hover{ text-decoration:underline; }
+.demo-label{ font-size:10px; font-weight:600; color:#6b7280; letter-spacing:.5px; text-transform:uppercase; margin-bottom:6px; }
+@keyframes shake{ 0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)} }
+.shake{ animation:shake .35s ease; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo-wrap">
+    <div class="logo-ico">🌿</div>
+    <div class="logo-name">Fresh<span class="logo-dot">.</span>Harvest</div>
+    <div class="logo-sub">Taze hám sapali azıq-awqat</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" id="t-k" onclick="tab('k')">Kiriw</button>
+    <button class="tab"    id="t-d" onclick="tab('d')">Dizimge alıw</button>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <div id="f-k">
+    <label class="lbl">Telefon nomeri</label>
+    <input class="inp" id="phone" type="tel" placeholder="+998 90 123 45 67"
+      oninput="fmtPhone(this)" onkeydown="if(event.key==='Enter')submit()"/>
+    <button class="sbtn" id="kbtn" onclick="submit()">Kirip ótiw →</button>
+  </div>
+
+  <div id="f-d" style="display:none">
+    <label class="lbl">Ismiń</label>
+    <input class="inp" id="dname" type="text" placeholder="Ismiń (mısal: Azamat)"/>
+    <label class="lbl">Telefon nomeri</label>
+    <input class="inp" id="dphone" type="tel" placeholder="+998 90 123 45 67"
+      oninput="fmtPhone(this)" onkeydown="if(event.key==='Enter')submit()"/>
+    <button class="sbtn" id="dbtn" onclick="submit()">Dizimge alınıw ✓</button>
+  </div>
+
+  <div class="sep">yaki</div>
+
+  <div class="demo-box">
+    <div class="demo-label">Tez sinaw</div>
+    <div class="demo-row" onclick="quick('+998901111111')">👤 Paydalanıwshı — <code>+998901111111</code></div>
+    <div class="demo-row" onclick="quick('+998901234567')">🔑 Admin — <code>+998901234567</code></div>
+  </div>
+</div>
+
+<script type="module">
+import { Auth } from './app.js';
+const u = Auth.me();
+if (u) location.href = u.role === 'admin' ? 'admin.html' : 'index.html';
+
+let cur = 'k';
+window.tab = t => {
+  cur = t; errClear();
+  const k = t === 'k';
+  document.getElementById('t-k').className = 'tab' + (k?' on':'');
+  document.getElementById('t-d').className = 'tab' + (!k?' on':'');
+  document.getElementById('f-k').style.display = k ? 'block':'none';
+  document.getElementById('f-d').style.display = k ? 'none':'block';
+};
+window.fmtPhone = el => {
+  let d = el.value.replace(/\D/g,'');
+  if (!d.startsWith('998')) d = '998' + d.replace(/^998/,'');
+  el.value = '+' + d.slice(0,12);
+};
+function errShow(m){ const e=document.getElementById('err'); e.textContent=m; e.style.display='block'; e.classList.remove('shake'); void e.offsetWidth; e.classList.add('shake'); }
+function errClear(){ document.getElementById('err').style.display='none'; }
+
+window.submit = () => {
+  errClear();
+  if (cur === 'd') {
+    const name = document.getElementById('dname').value.trim();
+    if (!name || name.length < 2) return errShow('❌ Ismin 2+ hárip bolsın!');
+    const {err, user} = Auth.login(document.getElementById('dphone').value.trim());
+    if (err) return errShow('❌ '+err);
+    const u = Auth.me(); if (u) { u.name = name; localStorage.setItem('fh_user', JSON.stringify(u)); }
+    location.href = 'index.html';
+  } else {
+    const {err, user} = Auth.login(document.getElementById('phone').value.trim());
+    if (err) return errShow('❌ '+err);
+    location.href = user.role === 'admin' ? 'admin.html' : 'index.html';
+  }
+};
+window.quick = n => { document.getElementById('phone').value = n; tab('k'); submit(); };
+</script>
+</body>
+</html>
